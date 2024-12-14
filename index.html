@@ -177,9 +177,75 @@
             <input type="text" id="name" name="Name" autocomplete="off" placeholder="Please enter a valid name.">
 
             <label for="unit">Coy (Optional):-</label>
-            <input type="text" id="unit" name="Unit" autocomplete="off">
-            <ul id="suggestions" style="border: 1px solid #ccc; display: none; position: absolute; background: white; z-index: 1000;"></ul>
-
+            <input type="text" id="unit" name="Coy" autocomplete="off" placeholder="Type A, B, C, D, SP, HQ">
+            <ul id="suggestions" style="border: 1px solid #ccc; display: none; position: absolute; background: white; z-index: 1000; list-style: none; margin: 0; padding: 5px;"></ul>
+            <div id="error-message" style="color: red; font-size: 0.9rem; display: none; margin-top: 5px;"></div> <!-- Error message container -->
+            
+            <script>
+                const coyInput = document.getElementById('unit');
+                const suggestionsList = document.getElementById('suggestions');
+                const errorMessage = document.getElementById('error-message');
+            
+                // Define the suggestions
+                const suggestions = ['A COY', 'B COY', 'C COY', 'D COY', 'SP COY', 'HQ COY'];
+            
+                // Event listener for input
+                coyInput.addEventListener('input', () => {
+                    const inputValue = coyInput.value.toUpperCase(); // Convert to uppercase for comparison
+                    suggestionsList.innerHTML = ''; // Clear previous suggestions
+                    errorMessage.style.display = 'none'; // Hide error message during input
+            
+                    if (inputValue) {
+                        // Filter suggestions based on input
+                        const filteredSuggestions = suggestions.filter(suggestion =>
+                            suggestion.startsWith(inputValue)
+                        );
+            
+                        // Populate suggestions if any match
+                        if (filteredSuggestions.length > 0) {
+                            filteredSuggestions.forEach(suggestion => {
+                                const li = document.createElement('li');
+                                li.textContent = suggestion;
+                                li.style.cursor = 'pointer';
+                                li.style.padding = '5px';
+            
+                                // Add click event to populate the input with the selected suggestion
+                                li.addEventListener('click', () => {
+                                    coyInput.value = suggestion; // Set input value to the selected suggestion
+                                    suggestionsList.style.display = 'none'; // Hide suggestions
+                                });
+            
+                                suggestionsList.appendChild(li);
+                            });
+                            suggestionsList.style.display = 'block'; // Show suggestions
+                        } else {
+                            suggestionsList.style.display = 'none'; // Hide suggestions if no match
+                        }
+                    } else {
+                        suggestionsList.style.display = 'none'; // Hide suggestions if input is empty
+                    }
+                });
+            
+                // Validate input on blur (when the user leaves the input field)
+                coyInput.addEventListener('blur', () => {
+                    const inputValue = coyInput.value.toUpperCase();
+                    if (inputValue && !suggestions.some(suggestion => suggestion === inputValue)) {
+                        // If input is invalid, show an error message
+                        errorMessage.textContent = 'Please enter a valid Coy (A, B, C, D, SP, HQ).';
+                        errorMessage.style.display = 'block';
+                    } else {
+                        errorMessage.style.display = 'none'; // Hide error message if input is valid
+                    }
+                });
+            
+                // Hide suggestions when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!suggestionsList.contains(e.target) && e.target !== coyInput) {
+                        suggestionsList.style.display = 'none';
+                    }
+                });
+            </script>
+            
             <label for="feedback">Write down your Suggestion</label>
             <textarea id="suggestion" name="Suggestion" rows="4" placeholder="Write your suggestion here..."></textarea>
         </div>
@@ -194,7 +260,7 @@
     </form>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycby4iAloxH4856KixghB1cAWZbZQm9GbsiAHM-LitLx25gev04idWoToTz6GV7LS3avGXw/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzjnVGvvtPJPAIj0WBNYYaFum9AL7RvIu8dVSsp-ZWX0moctxSuMKnL6IkWw1LecfjA/exec';
         const form = document.forms['submit-to-google-sheet'];
         form.addEventListener('submit', e => {
             e.preventDefault();
@@ -207,46 +273,6 @@
                 .catch(error => console.error('Error!', error.message));
         });
 
-        const inputField = document.getElementById("unit");
-        const suggestionsList = document.getElementById("suggestions");
-        const units = [
-            ...Array.from({ length: 22 }, (_, i) => `${i + 1} GARH RIF`), // Numbers 1 to 22 with "GARH RIF"
-            "GARHWAL SCOUTS",
-            "GRRC"
-        ];
-        inputField.addEventListener("input", () => {
-            const query = inputField.value.trim().toLowerCase();
-            let filteredSuggestions = [];
-            if (query.startsWith("g")) {
-                filteredSuggestions = ["GARHWAL SCOUTS", "GRRC"];
-            } else if (!isNaN(query) && query >= 1 && query <= 22) {
-                filteredSuggestions = [`${query} GARH RIF`];
-            } else if (query) {
-                filteredSuggestions = units.filter(unit => unit.toLowerCase().includes(query));
-            }
-            suggestionsList.innerHTML = "";
-            if (filteredSuggestions.length) {
-                suggestionsList.style.display = "block";
-                filteredSuggestions.forEach(suggestion => {
-                    const li = document.createElement("li");
-                    li.textContent = suggestion;
-                    li.style.padding = "5px";
-                    li.style.cursor = "pointer";
-                    li.addEventListener("click", () => {
-                        inputField.value = suggestion;
-                        suggestionsList.style.display = "none";
-                    });
-                    suggestionsList.appendChild(li);
-                });
-            } else {
-                suggestionsList.style.display = "none";
-            }
-        });
-        document.addEventListener("click", (e) => {
-            if (!suggestionsList.contains(e.target) && e.target !== inputField) {
-                suggestionsList.style.display = "none";
-            }
-        });
     </script>
 </body>
 </html>
